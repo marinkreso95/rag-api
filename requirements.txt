@@ -1,0 +1,24 @@
+# FastAPI and server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlmodel
+psycopg2-binary
+asyncpg
+pgvector
+
+# LangChain and AI
+langchain
+langchain-openai
+langchain-postgres
+langchain-community
+langchain-text-splitters
+
+# PDF processing
+pypdf
+
+# Utils
+python-dotenv
+pydantic-settings

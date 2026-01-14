@@ -1,0 +1,14 @@
+# Database
+export RAG_API_DATABASE_URL=postgresql://root:root@localhost:5432/rag_api
+
+# OpenAI
+export RAG_API_OPENAI_API_KEY=your-openai-api-key-here
+export RAG_API_OPENAI_MODEL=gpt-4o-mini
+export RAG_API_OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# Vector store
+export RAG_API_VECTOR_COLLECTION_NAME=document_embeddings
+
+# File uploaduv
+export RAG_API_MAX_FILE_SIZE_MB=50
+export RAG_API_ALLOWED_EXTENSIONS="["pdf", "txt", "md"]"
