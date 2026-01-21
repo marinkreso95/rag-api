@@ -1,13 +1,13 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
-
+import os
 class Settings(BaseSettings):
     # Database
-    database_url: str = ""
+    database_url: str = os.getenv('DATABASE_URI')
     
     # OpenAI
-    openai_api_key: str = ""
+    openai_api_key: str = os.getenv('OPENAI_KEY')
     openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
     
