@@ -113,7 +113,10 @@ class MessageListResponse(BaseModel):
 
 class AIResponse(BaseModel):
     message: MessageResponse
-    sources: list[str] = Field(default=[], description="Source documents used for the answer")
+    source_refs: dict[str, dict[str, str]] = Field(
+        default={},
+        description="Per-document source references keyed by citation number"
+    )
 
 
 # ============== Health Check ==============

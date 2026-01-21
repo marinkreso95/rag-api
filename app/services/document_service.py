@@ -136,15 +136,17 @@ class DocumentService:
                 loader = TextLoader(tmp_file.name)
             
             return loader.load()
-    
+
     def _add_metadata(
-        self, 
-        documents: list[LangchainDocument], 
-        document: Document,
-        project_id: UUID
+            self,
+            documents: list[LangchainDocument],
+            document: Document,
+            project_id: UUID
     ) -> None:
         """Add metadata to documents for filtering."""
-        for doc in documents:
+        for idx, doc in enumerate(documents, 1):
             doc.metadata["document_id"] = str(document.id)
             doc.metadata["document_name"] = document.name
             doc.metadata["project_id"] = str(project_id)
+            doc.metadata["chunk_id"] = f"{document.id}:{idx}"
+            doc.metadata["chunk_index"] = idx

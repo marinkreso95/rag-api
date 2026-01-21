@@ -1,5 +1,5 @@
 from functools import lru_cache
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from langchain_postgres import PGVector
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.core.config import get_settings
@@ -8,21 +8,25 @@ settings = get_settings()
 
 
 @lru_cache
-def get_embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings(
-        model=settings.openai_embedding_model,
-        openai_api_key=settings.openai_api_key
+def get_embeddings() -> AzureOpenAIEmbeddings:
+    return AzureOpenAIEmbeddings(
+        model=settings.azure_openai_embedding_model,
+        api_key=settings.azure_openai_api_key,
+        azure_endpoint=settings.azure_openai_endpoint,
+        api_version=settings.azure_openai_api_version_embedding,
+
     )
 
 
 @lru_cache
-def get_llm() -> ChatOpenAI:
-    return ChatOpenAI(
-        model=settings.openai_model,
-        openai_api_key=settings.openai_api_key,
-        temperature=0.1
+def get_llm() -> AzureChatOpenAI:
+    return AzureChatOpenAI(
+        model=settings.azure_openai_model,
+        api_key=settings.azure_openai_api_key,
+        azure_endpoint=settings.azure_openai_endpoint,
+        api_version=settings.azure_openai_api_version,
+        temperature=0.0
     )
-
 
 @lru_cache
 def get_vector_store() -> PGVector:

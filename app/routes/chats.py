@@ -275,7 +275,7 @@ async def send_message(
         )
     
     # Send message and get AI response
-    human_msg, ai_msg, sources = await chat_service.send_message(
+    human_msg, ai_msg, source_refs = await chat_service.send_message(
         session=session,
         chat=chat,
         content=message_data.content
@@ -289,7 +289,7 @@ async def send_message(
             sender_type=ai_msg.sender_type,
             created_at=ai_msg.created_at
         ),
-        sources=sources
+        source_refs = source_refs
     )
 
 

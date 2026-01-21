@@ -66,12 +66,12 @@ class ChatService:
         chat: Chat,
         content: str,
         auto_title: bool = True
-    ) -> tuple[Message, Message, list[str]]:
+    ) -> tuple[Message, Message, dict[str, dict[str, str]]]:
         """
         Send a message and get AI response.
         
         Returns:
-            Tuple of (human_message, ai_message, sources)
+            Tuple of (human_message, ai_message, sources, source_refs)
         """
         # 1. Save human message
         human_message = Message(
@@ -100,7 +100,7 @@ class ChatService:
         history = self._get_chat_history(session, chat.id)
         
         # 5. Generate AI response
-        answer, sources = self.ai_service.retrieve_answer(
+        answer, source_refs = self.ai_service.retrieve_answer(
             question=content,
             docs=docs,
             chat_history=history
@@ -131,7 +131,7 @@ class ChatService:
         session.refresh(ai_message)
         session.refresh(chat)
         
-        return human_message, ai_message, sources
+        return human_message, ai_message, source_refs
     
     def get_messages(
         self, 
