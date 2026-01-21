@@ -1,7 +1,10 @@
+import logging
 import tempfile
+import time
 from dataclasses import dataclass
 from uuid import UUID
 from typing import Optional
+import fitz
 
 from langchain_core.vectorstores import VectorStore
 from langchain_core.documents import Document as LangchainDocument
@@ -9,6 +12,7 @@ from langchain_text_splitters import TextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from sqlmodel import Session
 
+from app.core import engine
 from app.models import Document
 from app.repositories import DocumentRepository
 
@@ -19,49 +23,30 @@ class DocumentService:
     text_splitter: TextSplitter
     document_repository: DocumentRepository
     
-    async def save_document(
-        self, 
-        session: Session, 
-        project_id: UUID,
-        filename: str,
-        file_type: str,
-        file_size: int,
+    def save_document_vectors(
+        self,
+        document_id: UUID,
         content: bytes
-    ) -> Document:
-        """Save document to database and process for vector store."""
-        
-        # 1. Save document metadata to database
-        document = self.document_repository.create(
-            session=session,
-            project_id=project_id,
-            name=filename,
-            file_type=file_type,
-            file_size=file_size,
-            content=content,
-            chunk_count=0
-        )
-        
-        # 2. Convert to LangChain documents
-        langchain_docs = self._convert_to_documents(content, file_type, filename)
-        
-        # 3. Split into chunks
-        all_splits = self.text_splitter.split_documents(langchain_docs)
-        
-        # 4. Add metadata for filtering
-        self._add_metadata(all_splits, document, project_id)
-        
-        # 5. Add to vector store
-        #if all_splits:
-        #   await self.vector_store.aadd_documents(all_splits)
-        self.vector_store.add_documents(all_splits)
-        
-        # 6. Update chunk count
-        document = self.document_repository.update_chunk_count(
-            session, document, len(all_splits)
-        )
-        
-        return document
-    
+    ):
+        """Calculate vectors and store them to vector store."""
+
+        with Session(engine, expire_on_commit=False) as session:
+            document = self.document_repository.get_by_id(session, document_id)
+            if not document:
+                logging.error(f"Document not found")
+                return
+
+            langchain_docs = self._convert_to_documents(content, document.file_type, document.name)
+            all_splits = self.text_splitter.split_documents(langchain_docs)
+
+            self._add_metadata(all_splits, document, document.project_id)
+
+            self.vector_store.add_documents(all_splits)
+
+            self.document_repository.finish_embedding(
+                session, document, len(all_splits)
+            )
+
     async def search(
         self, 
         query: str, 
@@ -126,7 +111,24 @@ class DocumentService:
             tmp_file.flush()
             
             if file_type == "pdf":
-                loader = PyPDFLoader(tmp_file.name)
+                doc = fitz.open(stream=content, filetype="pdf")
+                documents = []
+
+                for page_number, page in enumerate(doc):
+                    text = page.get_text()
+                    if text.strip():
+                        print(text)
+                        documents.append(
+                            LangchainDocument(
+                                page_content=text,
+                                metadata={
+                                    "source": filename,
+                                    "page": page_number + 1
+                                }
+                            )
+                        )
+
+                return documents
             elif file_type in ["txt", "md"]:
                 loader = TextLoader(tmp_file.name)
             else:

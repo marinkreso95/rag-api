@@ -10,6 +10,13 @@ class SenderType(str, Enum):
     AI = "ai"
 
 
+class DocumentStatus(str, Enum):
+    PENDING = "Pending"
+    IN_PROGRESS = "In progress"
+    SUCCESSFUL = "Successful"
+    FAILED = "Failed"
+
+
 # ============== Project ==============
 
 class ProjectBase(SQLModel):
@@ -19,11 +26,11 @@ class ProjectBase(SQLModel):
 
 class Project(ProjectBase, table=True):
     __tablename__ = "projects"
-    
+
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
+
     # Relationships
     documents: list["Document"] = Relationship(back_populates="project", cascade_delete=True)
     chats: list["Chat"] = Relationship(back_populates="project", cascade_delete=True)
@@ -39,11 +46,11 @@ class DocumentBase(SQLModel):
 
 class Document(DocumentBase, table=True):
     __tablename__ = "documents"
-    
+
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     project_id: UUID = Field(foreign_key="projects.id", ondelete="CASCADE")
-    content: Optional[bytes] = Field(default=None)
     chunk_count: int = Field(default=0)
+    status: DocumentStatus = Field(default=DocumentStatus.IN_PROGRESS)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Relationships

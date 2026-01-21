@@ -30,7 +30,13 @@ def get_vector_store() -> PGVector:
         embeddings=get_embeddings(),
         collection_name=settings.vector_collection_name,
         connection=settings.database_url,
-        use_jsonb=True
+        use_jsonb=True,
+        engine_args={
+            "pool_pre_ping": True,
+            "connect_args": {
+                "options": "-c idle_in_transaction_session_timeout=0"
+            }
+        }
     )
 
 

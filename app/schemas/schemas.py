@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from app.models import SenderType
+from app.models.models import DocumentStatus
 
 
 # ============== Project Schemas ==============
@@ -44,6 +45,7 @@ class DocumentResponse(BaseModel):
     file_type: str
     file_size: int
     chunk_count: int
+    status: DocumentStatus
     created_at: datetime
     
     class Config:

@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # File upload
     max_file_size_mb: int = 50
     allowed_extensions: list[str] = ["pdf", "txt", "md"]
+
+    # Azure Blob Storage
+    blob_storage_container: str = "rag-api"
+    blob_storage_connection_string: str = os.getenv('AZURE_BLOB_URI')
+    
     
     class Config:
         env_file = ".env"
@@ -26,3 +31,4 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+

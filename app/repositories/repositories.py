@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Optional, Sequence
 
 from app.models import Project, Document, Chat, Message, ChatDocument
+from app.models.models import DocumentStatus
 
 
 class ProjectRepository:
@@ -54,14 +55,15 @@ class ProjectRepository:
 class DocumentRepository:
     
     def create(self, session: Session, project_id: UUID, name: str, file_type: str,
-               file_size: int, content: bytes, chunk_count: int = 0) -> Document:
+               file_size: int, chunk_count: int = 0,
+               status: DocumentStatus = DocumentStatus.IN_PROGRESS) -> Document:
         document = Document(
             project_id=project_id,
             name=name,
             file_type=file_type,
             file_size=file_size,
-            content=content,
-            chunk_count=chunk_count
+            chunk_count=chunk_count,
+            status=status
         )
         session.add(document)
         session.commit()
@@ -89,8 +91,9 @@ class DocumentRepository:
         session.delete(document)
         session.commit()
     
-    def update_chunk_count(self, session: Session, document: Document, chunk_count: int) -> Document:
+    def finish_embedding(self, session: Session, document: Document, chunk_count: int) -> Document:
         document.chunk_count = chunk_count
+        document.status = DocumentStatus.SUCCESSFUL
         session.add(document)
         session.commit()
         session.refresh(document)
